@@ -1,10 +1,7 @@
-const pdfParse = require("pdf-parse")
+const pdfParse = require("pdf-parse/lib/pdf-parse.js")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
-/**
- * @description Controller to generate interview report
- */
 async function generateInterViewReportController(req, res) {
     try {
         // Parse PDF file
@@ -37,15 +34,12 @@ async function generateInterViewReportController(req, res) {
     } catch (error) {
         console.error("Error:", error.message)
         res.status(500).json({
-            message: "Failed to generate interview report.",
+            message: "Failed to generate report.",
             error: error.message
         })
     }
 }
 
-/**
- * @description Controller to get interview report by interviewId
- */
 async function getInterviewReportByIdController(req, res) {
     try {
         const { interviewId } = req.params
@@ -68,15 +62,12 @@ async function getInterviewReportByIdController(req, res) {
 
     } catch (error) {
         res.status(500).json({
-            message: "Failed to fetch interview report.",
+            message: "Failed to fetch report.",
             error: error.message
         })
     }
 }
 
-/**
- * @description Controller to get all interview reports
- */
 async function getAllInterviewReportsController(req, res) {
     try {
         const interviewReports = await interviewReportModel
@@ -91,18 +82,17 @@ async function getAllInterviewReportsController(req, res) {
 
     } catch (error) {
         res.status(500).json({
-            message: "Failed to fetch interview reports.",
+            message: "Failed to fetch reports.",
             error: error.message
         })
     }
 }
 
-/**
- * @description Controller to generate resume PDF
- */
 async function generateResumePdfController(req, res) {
     try {
         const { interviewReportId } = req.params
+
+        console.log("Generating resume PDF for:", interviewReportId)
 
         const interviewReport = await interviewReportModel.findById(interviewReportId)
 
@@ -112,19 +102,29 @@ async function generateResumePdfController(req, res) {
             })
         }
 
+        console.log("Found report, generating HTML...")
+
         const { resume, jobDescription, selfDescription } = interviewReport
+
+        if (!resume || !jobDescription) {
+            return res.status(400).json({
+                message: "Resume or job description missing."
+            })
+        }
 
         const htmlContent = await generateResumePdf({
             resume,
             jobDescription,
-            selfDescription
+            selfDescription: selfDescription || ""
         })
 
-        // Send HTML instead of PDF
+        console.log("HTML generated successfully!")
+
         res.set({ "Content-Type": "text/html" })
         res.send(htmlContent)
 
     } catch (error) {
+        console.error("Resume PDF Error:", error.message)
         res.status(500).json({
             message: "Failed to generate resume.",
             error: error.message

@@ -8,7 +8,7 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 
     const prompt = `You are an expert career coach and interview preparation specialist.
 
-Analyze the following candidate details and generate a comprehensive interview report.
+Analyze the following candidate details and generate a comprehensive report.
 
 Resume: ${resume}
 Self Description: ${selfDescription}
@@ -17,7 +17,14 @@ Job Description: ${jobDescription}
 Return ONLY a valid JSON object with exactly these fields:
 {
     "matchScore": <number between 0 and 100>,
+    "resumeScore": <number between 0 and 100>,
+    "atsScore": <number between 0 and 100>,
     "title": "<job title>",
+    "summary": "<2-3 sentence assessment of candidate>",
+    "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
+    "improvements": ["<improvement 1>", "<improvement 2>", "<improvement 3>"],
+    "missingKeywords": ["<keyword 1>", "<keyword 2>", "<keyword 3>", "<keyword 4>", "<keyword 5>"],
+    "suggestedRoles": ["<role 1>", "<role 2>", "<role 3>"],
     "technicalQuestions": [
         {
             "question": "<technical question>",
@@ -50,20 +57,13 @@ Return ONLY a valid JSON object with exactly these fields:
 Return ONLY the JSON. No extra text, no markdown, no explanation.`
 
     const response = await groq.chat.completions.create({
-        model: "llama3-8b-8192",
-        messages: [
-            {
-                role: "user",
-                content: prompt
-            }
-        ],
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 3000,
     })
 
     const content = response.choices[0].message.content.trim()
-
-    // Remove markdown if AI adds it
     const cleaned = content
         .replace(/```json/g, "")
         .replace(/```/g, "")
@@ -72,54 +72,44 @@ Return ONLY the JSON. No extra text, no markdown, no explanation.`
     return JSON.parse(cleaned)
 }
 
-
 async function generateResumePdf({ resume, selfDescription, jobDescription }) {
 
     const prompt = `You are an expert resume writer.
 
-Create a professional, ATS-friendly resume in HTML format for this candidate:
+Create a professional ATS-friendly resume in HTML format for this candidate:
 
 Resume: ${resume}
 Self Description: ${selfDescription}
 Job Description: ${jobDescription}
 
-Return ONLY a valid JSON object with this exact field:
+Return ONLY a valid JSON object:
 {
     "html": "<complete HTML resume here>"
 }
 
-Requirements for the HTML resume:
+Requirements:
 - Professional and clean design
 - ATS friendly
 - 1-2 pages when printed
-- Highlight relevant experience for the job
-- Use simple colors and formatting
-- Do NOT sound AI generated
+- Highlight relevant experience
+- Simple colors and formatting
 
 Return ONLY the JSON. No extra text.`
 
     const response = await groq.chat.completions.create({
-        model: "llama3-8b-8192",
-        messages: [
-            {
-                role: "user",
-                content: prompt
-            }
-        ],
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
         max_tokens: 3000,
     })
 
     const content = response.choices[0].message.content.trim()
-
     const cleaned = content
         .replace(/```json/g, "")
         .replace(/```/g, "")
         .trim()
 
     const jsonContent = JSON.parse(cleaned)
-
-    // Return HTML content directly instead of PDF
     return jsonContent.html
 }
 
