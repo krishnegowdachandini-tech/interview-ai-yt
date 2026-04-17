@@ -30,6 +30,82 @@ const NAV_ITEMS = [
 
 const QuestionCard = ({ item, index }) => {
     const [open, setOpen] = useState(false)
+
+    const formatAnswer = (answer) => {
+        if (answer && answer.includes('Situation:')) {
+
+            // Try splitting by | first, then by keyword
+            let parts = []
+
+            if (answer.includes('|')) {
+                parts = answer.split('|')
+            } else {
+                // Split by STAR keywords
+                const keywords = ['Situation:', 'Task:', 'Action:', 'Result:']
+                let remaining = answer
+                keywords.forEach((keyword, i) => {
+                    const nextKeyword = keywords[i + 1]
+                    if (remaining.includes(keyword)) {
+                        const start = remaining.indexOf(keyword)
+                        const end = nextKeyword && remaining.includes(nextKeyword)
+                            ? remaining.indexOf(nextKeyword)
+                            : remaining.length
+                        parts.push(remaining.substring(start, end).trim())
+                    }
+                })
+            }
+
+            const colors = {
+                'Situation': '#FF6B9D',
+                'Task': '#4ECDC4',
+                'Action': '#45B7D1',
+                'Result': '#96CEB4'
+            }
+
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {parts.map((part, i) => {
+                        const trimmed = part.trim()
+                        const colonIndex = trimmed.indexOf(':')
+                        if (colonIndex === -1) return null
+                        const label = trimmed.substring(0, colonIndex).trim()
+                        const content = trimmed.substring(colonIndex + 1).trim()
+
+                        return (
+                            <div key={i} style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                padding: '10px 14px',
+                                borderRadius: '8px',
+                                background: 'rgba(255,255,255,0.04)',
+                                borderLeft: `3px solid ${colors[label] || '#888'}`
+                            }}>
+                                <span style={{
+                                    fontWeight: 'bold',
+                                    color: colors[label] || '#888',
+                                    fontSize: '12px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px'
+                                }}>
+                                    {label}
+                                </span>
+                                <span style={{
+                                    color: '#CBD5E1',
+                                    fontSize: '14px',
+                                    lineHeight: '1.6'
+                                }}>
+                                    {content}
+                                </span>
+                            </div>
+                        )
+                    })}
+                </div>
+            )
+        }
+        return <p style={{ color: '#CBD5E1', lineHeight: '1.6' }}>{answer}</p>
+    }
+
     return (
         <div className='q-card'>
             <div className='q-card__header' onClick={() => setOpen(o => !o)}>
@@ -45,11 +121,11 @@ const QuestionCard = ({ item, index }) => {
                 <div className='q-card__body'>
                     <div className='q-card__section'>
                         <span className='q-card__tag q-card__tag--intention'>Intention</span>
-                        <p>{item.intention}</p>
+                        <p style={{ color: '#CBD5E1', lineHeight: '1.6' }}>{item.intention}</p>
                     </div>
                     <div className='q-card__section'>
                         <span className='q-card__tag q-card__tag--answer'>Model Answer</span>
-                        <p>{item.answer}</p>
+                        {formatAnswer(item.answer)}
                     </div>
                 </div>
             )}
@@ -250,6 +326,52 @@ const Interview = () => {
                             ))}
                         </div>
                     </div>
+
+                    <div className='sidebar-divider' />
+
+                    {/* Strengths */}
+                    {report.strengths && report.strengths.length > 0 && (
+                        <div className='skill-gaps'>
+                            <p className='skill-gaps__label'>Strengths</p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {report.strengths.map((strength, i) => (
+                                    <div key={i} style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '8px',
+                                        fontSize: '13px',
+                                        color: '#CBD5E1'
+                                    }}>
+                                        <span style={{ color: '#96CEB4', fontWeight: 'bold' }}>✓</span>
+                                        {strength}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className='sidebar-divider' />
+
+                    {/* Missing Keywords */}
+                    {report.missingKeywords && report.missingKeywords.length > 0 && (
+                        <div className='skill-gaps'>
+                            <p className='skill-gaps__label'>Missing Keywords</p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                {report.missingKeywords.map((keyword, i) => (
+                                    <span key={i} style={{
+                                        background: 'rgba(255, 107, 157, 0.15)',
+                                        color: '#FF6B9D',
+                                        padding: '4px 10px',
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
+                                        border: '1px solid rgba(255, 107, 157, 0.3)'
+                                    }}>
+                                        {keyword}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                 </aside>
             </div>

@@ -2,10 +2,12 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import { useAuth } from '../../auth/hooks/useAuth'
 
 const Home = () => {
 
     const { loading, generateReport, reports } = useInterview()
+    const { handleLogout, user } = useAuth()
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
     const [selectedFile, setSelectedFile] = useState(null)
@@ -26,21 +28,77 @@ const Home = () => {
     }
 
     if (loading) {
-        return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
-        )
-    }
+    return (
+        <main className='loading-screen'>
+            <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100vh',
+                gap: '20px'
+            }}>
+                {/* Spinner */}
+                <div style={{
+                    width: '60px',
+                    height: '60px',
+                    border: '4px solid rgba(255,107,157,0.2)',
+                    borderTop: '4px solid #FF6B9D',
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite'
+                }} />
+                <h2 style={{ color: '#FF6B9D' }}>
+                    🤖 AI is analyzing your resume...
+                </h2>
+                <p style={{ color: '#CBD5E1', fontSize: '14px' }}>
+                    This takes about 30 seconds. Please wait!
+                </p>
+                <style>{`
+                    @keyframes spin {
+                        0% { transform: rotate(0deg); }
+                        100% { transform: rotate(360deg); }
+                    }
+                `}</style>
+            </div>
+        </main>
+    )
+}
 
     return (
         <div className='home-page'>
 
             {/* Page Header */}
             <header className='page-header'>
-                <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
-                <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
-            </header>
+    {/* Top bar with username and logout */}
+    <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+        padding: '12px 20px',
+        background: 'rgba(255,255,255,0.05)',
+        borderRadius: '10px'
+    }}>
+        <span style={{ color: '#CBD5E1', fontSize: '14px' }}>
+            👋 Welcome, <strong style={{ color: '#FF6B9D' }}>{user?.username || 'User'}</strong>
+        </span>
+        <button
+            onClick={() => { handleLogout(); navigate('/login') }}
+            style={{
+                background: 'transparent',
+                border: '1px solid #FF6B9D',
+                color: '#FF6B9D',
+                padding: '6px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px'
+            }}>
+            Logout
+        </button>
+    </div>
+    <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
+    <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
+</header>
 
             {/* Main Card */}
             <div className='interview-card'>

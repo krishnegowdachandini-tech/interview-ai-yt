@@ -1,0 +1,19 @@
+[33m069d347[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m day 1: project setup, env config and database connection
+[33mb72791b[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m add resume PDF generation feature
+[33medd86b4[m implement interview context and hooks; enhance Home and Interview components with report generation and retrieval features
+[33mb97cee2[m add interview report retrieval functionality and enhance report generation service
+[33mdcfd53d[m style: refactor Interview component and SCSS for improved readability and layout
+[33m0b77c71[m feat: add Interview component and update routing; enhance Home component layout and styles
+[33m8019c29[m feat: add Home component and update routing; enhance user authentication loading logic and styles
+[33m2d0e9e5[m feat: add interview report generation functionality with file upload support
+[33mb3993ff[m add zod validation and update AI service for interview report generation
+[33m5742596[m feat: integrate Google GenAI and add AI service for content generation
+[33mc6ec424[m Add interview report model with schemas for technical and behavioral questions, skill gaps, and preparation plans
+[33m861791d[m Add Protected route component and user loading logic in authentication context
+[33m0accce9[m Add authentication context, hooks, and API integration for login and registration
+[33maf5ba88[m Implement login and registration forms with styling and navigation
+[33m3193b2c[m Add routing and authentication pages for login and registration
+[33m8a0529d[m frontend-initialize
+[33m26c2ae3[m Add logout and get user details functionality with middleware for authentication
+[33m3616270[m Add logout functionality and token blacklist model
+[33m93a1c89[m first commit
