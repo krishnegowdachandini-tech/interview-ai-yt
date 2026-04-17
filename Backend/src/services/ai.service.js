@@ -221,40 +221,63 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
 Create a professional ATS-friendly resume in HTML format for this candidate:
 
 Resume: ${resume}
-Self Description: ${selfDescription}
+Self Description: ${selfDescription || "Not provided"}
 Job Description: ${jobDescription}
 
-Return ONLY a valid JSON object:
+Return ONLY a valid JSON object with this exact structure:
 {
     "html": "<complete HTML resume here>"
 }
 
 Requirements for the HTML resume:
+- Use only inline CSS styles
 - Professional and clean design
 - ATS friendly formatting
-- 1-2 pages when printed
-- Highlight relevant experience for the job
-- Use simple professional colors
-- Do NOT sound AI generated
-- Include all sections: Summary, Experience, Skills, Education
+- Include sections: Summary, Experience, Skills, Education
+- Do NOT use external fonts or links
+- Keep it simple and professional
 
-Return ONLY the JSON. No extra text, no markdown.`
+Return ONLY the JSON object. No markdown, no backticks, no extra text.`
 
-    const response = await groq.chat.completions.create({
-        model: "llama-3.3-70b-versatile",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 4000,
-    })
+    try {
+        const response = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 4000,
+        })
 
-    const content = response.choices[0].message.content.trim()
-    const cleaned = content
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim()
+        const content = response.choices[0].message.content.trim()
+        console.log("AI Response for PDF:", content.substring(0, 100))
 
-    const jsonContent = JSON.parse(cleaned)
-    return jsonContent.html
+        const cleaned = content
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim()
+
+        const jsonContent = JSON.parse(cleaned)
+
+        if (!jsonContent.html) {
+            throw new Error("No HTML content in response")
+        }
+
+        return jsonContent.html
+
+    } catch (error) {
+        console.error("Resume PDF generation error:", error.message)
+        return `
+        <html>
+        <body style="font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto;">
+            <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">Resume</h1>
+            <p style="color: #666;">We encountered an issue generating your resume. Please try again.</p>
+            <div style="margin-top: 20px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+                <h2>Your Resume Content:</h2>
+                <p>${resume.substring(0, 1000)}</p>
+            </div>
+        </body>
+        </html>
+        `
+    }
 }
 
 module.exports = { generateInterviewReport, generateResumePdf }
